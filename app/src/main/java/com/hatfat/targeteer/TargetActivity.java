@@ -35,6 +35,15 @@ public class TargetActivity extends AglActivity implements View.OnTouchListener 
         start();
     }
 
+    @Override public void onBackPressed() {
+        if (aglSurfaceView.getScene() instanceof TargetScene) {
+            stop();
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
+
     private void start() {
         startButton.setVisibility(View.GONE);
 
