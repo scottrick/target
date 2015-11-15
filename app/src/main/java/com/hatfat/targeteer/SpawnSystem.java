@@ -9,14 +9,15 @@ import com.hatfat.agl.component.transform.Transform;
 import com.hatfat.agl.entity.AglEntity;
 import com.hatfat.agl.mesh.TestRenderableFactory;
 import com.hatfat.agl.render.AglRenderable;
-import com.hatfat.agl.textures.AglTextureManager;
 import com.hatfat.agl.util.Vec3;
 
 import java.util.Arrays;
+import java.util.Random;
 
 public class SpawnSystem extends AglSystem {
 
-    private AglRenderable testRenderable;
+    private Random random = new Random();
+    private AglRenderable[] testRenderables = new AglRenderable[1];
 
     public SpawnSystem() {
         super(Arrays.asList(TargetComponentType.SPAWNER, ComponentType.TRANSFORM));
@@ -24,11 +25,13 @@ public class SpawnSystem extends AglSystem {
 
     @Override
     public void prepareRenderables(AglRenderer renderer) {
-        AglTextureManager tm = renderer.getTextureManager();
-        testRenderable = TestRenderableFactory.createNormalMappedTextureCube(
-                tm.getDefaultTexture(),
-                tm.getDefaultNormapMapTexture(),
-                tm.getDefaultNormapMapTexture());
+//        AglTextureManager tm = renderer.getTextureManager();
+//        testRenderable = TestRenderableFactory.createNormalMappedTextureCube(
+//                tm.getDefaultTexture(),
+//                tm.getDefaultNormapMapTexture(),
+//                tm.getDefaultNormapMapTexture());
+
+        testRenderables[0] = TestRenderableFactory.createIcosahedron();
     }
 
     @Override
@@ -38,15 +41,18 @@ public class SpawnSystem extends AglSystem {
 
         spawnComponent.currentTimer += deltaTime;
 
-        if (spawnComponent.currentTimer >= spawnComponent.frequency) {
+        while (spawnComponent.currentTimer >= spawnComponent.frequency) {
             /* spawn! */
             spawnComponent.currentTimer -= spawnComponent.frequency;
 
-            AglEntity newEntity = new AglEntity("spawned entity");
+            AglEntity newEntity = new AglEntity("Spawned Entity");
 
-            newEntity.addComponent(new Transform(transform.posQuat.pos));
-            newEntity.addComponent(new MovementComponent(spawnComponent.spawnVelocity, new Vec3()));
-            newEntity.addComponent(new RenderableComponent(testRenderable));
+            Transform newTransform = new Transform(transform.posQuat.pos);
+            newTransform.setScale(new Vec3(2.0f, 2.0f, 2.0f));
+
+            newEntity.addComponent(newTransform);
+            newEntity.addComponent(new MovementComponent(spawnComponent.getNewSpawnVelocity(), new Vec3()));
+            newEntity.addComponent(new RenderableComponent(testRenderables[random.nextInt(testRenderables.length)]));
 
             getScene().addEntity(newEntity);
         }

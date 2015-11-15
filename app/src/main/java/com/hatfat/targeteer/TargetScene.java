@@ -1,6 +1,7 @@
 package com.hatfat.targeteer;
 
 import android.content.Context;
+import android.graphics.RectF;
 
 import com.hatfat.agl.app.AglRenderer;
 import com.hatfat.agl.base.AglScene;
@@ -11,15 +12,16 @@ import com.hatfat.agl.component.transform.Transform;
 import com.hatfat.agl.entity.AglEntity;
 import com.hatfat.agl.mesh.TestRenderableFactory;
 import com.hatfat.agl.render.AglRenderable;
-import com.hatfat.agl.util.Vec2;
 import com.hatfat.agl.util.Vec3;
 
 public class TargetScene extends AglScene {
 
-    private Vec2 fieldDimensions = new Vec2();
+    private RectF fieldBoundaries = new RectF();
 
     public TargetScene(Context context) {
         super(context, true);
+
+        setDebugEnabled(true);
 
         addSystem(new SpawnSystem());
         addSystem(new MovementSystem());
@@ -38,8 +40,23 @@ public class TargetScene extends AglScene {
     @Override protected void setupSceneGLWork(AglRenderer renderer) {
         super.setupSceneGLWork(renderer);
 
-        fieldDimensions.x = ((OrthographicCameraComponent) getCamera()).getWidth();
-        fieldDimensions.y = ((OrthographicCameraComponent) getCamera()).getHeight();
+        OrthographicCameraComponent orthographicCameraComponent = (OrthographicCameraComponent) getCamera();
+
+        fieldBoundaries.left = -orthographicCameraComponent.getWidth() / 2.0f;
+        fieldBoundaries.right = orthographicCameraComponent.getWidth() / 2.0f;
+        fieldBoundaries.top = -orthographicCameraComponent.getHeight() / 2.0f;
+        fieldBoundaries.bottom = orthographicCameraComponent.getHeight() / 2.0f;
+
+        float extraSpace = 1.1f; //10% extra space before they are culled!
+        RectF systemBoundaries = new RectF(
+                fieldBoundaries.left * extraSpace,
+                fieldBoundaries.top * extraSpace,
+                fieldBoundaries.right * extraSpace,
+                fieldBoundaries.bottom * extraSpace);
+
+        /* we have our boundaries, so setup the boundary system */
+        BoundarySystem boundarySystem = new BoundarySystem(systemBoundaries);
+        addSystem(boundarySystem);
 
         AglRenderable titleRenderable = TestRenderableFactory.createTextureSquare(
                 renderer.getTextureManager().getTexture("title"));
@@ -51,7 +68,7 @@ public class TargetScene extends AglScene {
         AglEntity spawnEntity = new AglEntity("Test Spawner");
         spawnEntity.addComponent(renderableComponent);
         spawnEntity.addComponent(transformComponent);
-        spawnEntity.addComponent(new SpawnComponent(new Vec3(20.0f, 0.0f, 0.0f)));
+        spawnEntity.addComponent(new SpawnComponent(new Vec3(50.0f, 0.0f, 0.0f)));
         addEntity(spawnEntity);
 
 //        AglEntity titleEntity = new AglEntity("Test Entity");
