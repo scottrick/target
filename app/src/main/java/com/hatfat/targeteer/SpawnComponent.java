@@ -7,10 +7,10 @@ import java.util.Random;
 
 public class SpawnComponent extends AglComponent {
 
-    public float frequency = 0.05f;
+    public float frequency = 0.02f;
     public float currentTimer = 0.0f;
 
-    private float range = 6.0f;
+    private float range = 9.0f;
     private Random random = new Random();
 
     private Vec3 spawnVelocity;

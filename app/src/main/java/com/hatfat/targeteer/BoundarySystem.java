@@ -33,8 +33,8 @@ public class BoundarySystem extends AglSystem {
         /* remove entities that are outside our boundary! */
         if (transform.posQuat.pos.x < boundary.left ||
                 transform.posQuat.pos.x > boundary.right ||
-                transform.posQuat.pos.y > boundary.bottom ||
-                transform.posQuat.pos.y < boundary.top) {
+                transform.posQuat.pos.y > boundary.top ||
+                transform.posQuat.pos.y < boundary.bottom) {
             getScene().removeEntity(entity);
         }
     }
