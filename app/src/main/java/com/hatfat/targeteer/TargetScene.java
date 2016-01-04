@@ -1,7 +1,14 @@
 package com.hatfat.targeteer;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.RectF;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.WindowManager;
 
 import com.hatfat.agl.app.AglRenderer;
 import com.hatfat.agl.base.AglScene;
@@ -19,6 +26,10 @@ public class TargetScene extends AglScene {
 
     private RectF fieldBoundaries = new RectF();
 
+    private DisplayMetrics displayMetrics;
+
+    private final GestureDetector gestureDetector;
+
     public TargetScene(Context context) {
         super(context, true);
 
@@ -26,6 +37,20 @@ public class TargetScene extends AglScene {
 
         addSystem(new SpawnSystem());
         addSystem(new MovementSystem());
+
+        Point windowSize = new Point();
+        Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+
+        ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getSize(windowSize);
+        Log.e("catfat", "other try (" + display.getWidth() + ", " + display.getHeight() + ")");
+        Log.e("catfat",
+                "window size (" + windowSize.x + ", " + windowSize.y + ")");
+
+        Log.e("catfat",
+                "OTHER metrics (" + context.getResources().getDisplayMetrics().widthPixels + ", "
+                        + context.getResources().getDisplayMetrics().heightPixels + ")");
+
+        gestureDetector = new GestureDetector(context, gestureListener);
 
         //Vec3 eye, Vec3 center, Vec3 up, float width, float near, float far
         AglEntity cameraEntity = new AglEntity("Targeteer! Menu Orthographic Camera");
@@ -42,7 +67,6 @@ public class TargetScene extends AglScene {
         super.setupSceneGLWork(renderer);
 
         OrthographicCameraComponent orthographicCameraComponent = (OrthographicCameraComponent) getCamera();
-
         fieldBoundaries.left = -orthographicCameraComponent.getWidth() / 2.0f;
         fieldBoundaries.right = orthographicCameraComponent.getWidth() / 2.0f;
         fieldBoundaries.top = orthographicCameraComponent.getHeight() / 2.0f;
@@ -86,5 +110,21 @@ public class TargetScene extends AglScene {
 //        titleEntity.addComponent(transformComponent);
 //        titleEntity.addComponent(new MovementComponent(new Vec3(0.0f, 0.0f, 0.0f), new Vec3(25.0f, 0.0f, 0.0f)));
 //        addEntity(titleEntity);
+    }
+
+    private final GestureDetector.SimpleOnGestureListener gestureListener = new GestureDetector.SimpleOnGestureListener() {
+        @Override public boolean onDown(MotionEvent e) {
+            Log.e("catfat", "onDown! (" + e.getX() + ", " + e.getY() + ")");
+            Log.e("catfat", "metrics (" + displayMetrics.widthPixels + ", " + displayMetrics.heightPixels + ")");
+            return true;
+        }
+    };
+
+    public GestureDetector getGestureDetector() {
+        return gestureDetector;
+    }
+
+    public void setDisplayMetrics(DisplayMetrics metrics) {
+        this.displayMetrics = metrics;
     }
 }
